@@ -1,10 +1,9 @@
-import sqlite3
-import os
 import datetime
 
 from google_credentials import GoogleCredentials
 from gmail import Gmail
 from contacts import Contacts
+from MessagesDB import MessagesDB
 
 # q= rfc822msgid:kuku7@messages2gmail.com
 
@@ -20,11 +19,15 @@ if __name__ == '__main__':
 	contacts = Contacts(google_credentials.credentials)
 	contacts.load_contacts()
 
-	user_dir = os.path.expanduser('~')
-	conn = sqlite3.connect(user_dir+'/backup_messages/chat.db')
+	MessagesDB = MessagesDB('/backup_messages')
 
-	c = conn.cursor()
-
-#	for row in c.execute('select text from message'):
-#		print row
+	# ROWID to Name cache
+	rowid_to_name = {}
+	for handle in MessagesDB.get_handles():
+		if '@' in handle['id']:
+			name = contacts.get_by_email(handle['id'])
+		else:
+			name = contacts.get_by_phone_number(handle['id'])
+		if name:
+			rowid_to_name[handle['rowid']] = name
 
