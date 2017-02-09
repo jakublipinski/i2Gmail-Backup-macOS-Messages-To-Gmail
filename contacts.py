@@ -3,6 +3,8 @@ import gdata.data
 import gdata.contacts.client
 import gdata.contacts.data
 
+import string
+
 import config
 
 class Contacts:
@@ -17,24 +19,43 @@ class Contacts:
 		self.client = gdata.contacts.client.ContactsClient()
 		auth2token.authorize(self.client)
 
-	def PrintAllContacts(self):
-	  feed = self.client.GetContacts()
-	  for i, entry in enumerate(feed.entry):
-		if entry.name:
-		  print '\n%s %s' % (i+1, entry.name.full_name.text)
-		if entry.content:
-		  print '    %s' % (entry.content.text)
-		# Display the primary email address for the contact.
-		for email in entry.email:
-		  if email.primary and email.primary == 'true':
-			print '    %s' % (email.address)
-		# Show the contact groups that this contact is a member of.
-		for group in entry.group_membership_info:
-		  print '    Member of group: %s' % (group.href)
-		# Display extended properties.
-		for extended_property in entry.extended_property:
-		  if extended_property.value:
-			value = extended_property.value
-		  else:
-			value = extended_property.GetXmlBlob()
-		  print '    Extended Property - %s: %s' % (extended_property.name, value)
+		self.email_to_name = {}
+		self.phone_to_name = {}
+
+	def load_contacts(self):
+		max_results = 99999
+		start_index = 1
+		query = gdata.contacts.client.ContactsQuery()
+		query.max_results = max_results
+		query.start_index = start_index
+
+		feed = self.client.GetContacts(q=query)
+		for i, entry in enumerate(feed.entry):
+			if entry.name:
+				full_name = entry.name.full_name.text
+
+				for email in entry.email:
+					if email in self.email_to_name:
+						print("Email address: '%s' is assigned to both '%s' and '%s'!"%
+							  (email, self.email_to_name[email], full_name))
+					else:
+						self.email_to_name[email] = full_name
+				for phone_number_entry in entry.phone_number:
+					phone_number = Contacts.strip_and_reverse_phone_number(phone_number_entry.text)
+					if phone_number in self.phone_to_name:
+						print("Phone number: '%s' is assigned to both '%s' and '%s'!"%
+							  (phone_number_entry.text, self.phone_to_name[phone_number], full_name))
+					else:
+						self.phone_to_name[phone_number] = full_name
+
+
+	all = string.maketrans('', '')
+	no_digits = all.translate(all, string.digits)
+
+	@staticmethod
+	def strip_and_reverse_phone_number(phone_number):
+		phone_number = phone_number.translate(Contacts.all, Contacts.no_digits)
+		phone_number = phone_number[-9:]
+		phone_number = phone_number[::-1]
+		return phone_number
+
