@@ -18,7 +18,7 @@ class GoogleCredentials:
 
     # Check https://developers.google.com/gmail/api/auth/scopes for all available scopes
     OAUTH_SCOPE = ['https://www.googleapis.com/auth/gmail.insert',
-                   'https://www.google.com/m8/feeds/contacts/default/full']
+                   'https://www.googleapis.com/auth/contacts.readonly']
 
     def authenticate(self):
         """Gets valid user credentials from storage.
