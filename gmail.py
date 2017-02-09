@@ -1,15 +1,4 @@
-from __future__ import print_function
-import httplib2
-import os
-import config
-
-from apiclient import discovery
-import oauth2client
-from oauth2client import client
-from oauth2client import tools
-from apiclient import errors
-
-import datetime, time
+import time
 
 import base64
 from email.mime.audio import MIMEAudio
@@ -20,47 +9,13 @@ from email.mime.text import MIMEText
 from email.utils import formatdate
 import mimetypes
 
-try:
-    import argparse
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
-except ImportError:
-    flags = None
+import httplib2
+from apiclient import discovery
 
 
 class Gmail:
 
-    # Check https://developers.google.com/gmail/api/auth/scopes for all available scopes
-    OAUTH_SCOPE = ['https://www.googleapis.com/auth/gmail.insert',]
-
-    def __init__(self):
-        self.gmail_client = None
-
-    def get_credentials(self):
-        """Gets valid user credentials from storage.
-
-        If nothing has been stored, or if the stored credentials are invalid,
-        the OAuth2 flow is completed to obtain the new credentials.
-
-        Returns:
-            Credentials, the obtained credential.
-        """
-
-        store = oauth2client.file.Storage(config.CREDENTIALS_STORAGE_FILE)
-        credentials = store.get()
-        if not credentials or credentials.invalid:
-            flow = client.flow_from_clientsecrets(config.CLIENT_SECRET_FILE,
-                                                  self.OAUTH_SCOPE)
-            flow.user_agent = config.APPLICATION_NAME
-            if flags:
-                credentials = tools.run_flow(flow, store, flags)
-            else: # Needed only for compatibility with Python 2.6
-                credentials = tools.run(flow, store)
-            print('Storing credentials to ' + config.CREDENTIALS_STORAGE_FILE)
-        return credentials
-
-    def connect(self):
-        credentials = self.get_credentials()
-
+    def __init__(self, credentials):
         # Authorize the httplib2.Http object with our credentials
         http = credentials.authorize(httplib2.Http())
 
