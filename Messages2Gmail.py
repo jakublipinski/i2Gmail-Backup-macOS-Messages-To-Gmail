@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	contacts = Contacts(google_credentials.credentials)
 	contacts.load_contacts()
 
-	MessagesDB = MessagesDB('/backup_messages_2017')
+	MessagesDB = MessagesDB('~/backup_messages_2017/')
 
 	# handle_id to Name cache
 	handle_to_name = {}
@@ -42,7 +42,6 @@ if __name__ == '__main__':
 
 		msg_id = '<%s_%s>' % (message['guid'], google_credentials.email)
 
-		print message['handle_id']
 		name = handle_to_name[message['handle_id']]
 		if message['is_from_me']:
 			sender = google_credentials.email
@@ -54,27 +53,23 @@ if __name__ == '__main__':
 		subject = "Chat with %s" % (name)
 		date = datetime.datetime.fromtimestamp(978307200 + message['date'])
 
-#		thread_id = '<%s_%s_%s>' % (date.strftime("%d%m%Y"),
-#									message['handle_id'],
-#									google_credentials.email)
-
 		thread_key = '%s_%s' % (date.strftime("%d%m%Y"),
 								message['handle_id'])
 		thread = threads.get(thread_key, {"thread_id":None, "in_reply_to":None})
 
-		print msg_id
-		print thread
 		print sender.encode('utf-8')
 		print to.encode('utf-8')
-		print name.encode('utf-8')
 		print subject.encode('utf-8')
 		if message['text']:
 			print message['text'].encode('utf-8')
+		if message['attachments']:
+			print message['attachments']
+		print
 
-		msg = Gmail.create_message(msg_id, sender, to, subject, date, message['text'],
+		msg = Gmail.create_message_with_attachments(msg_id, sender, to, subject, date, message['text'], message['attachments'],
 								   in_reply_to=thread['in_reply_to'], references=thread['in_reply_to'])
 
 		msg = gmail.insert_message(msg, labelIds=[labels['Text']]
-							 , threadId=thread['thread_id']
-							 )
+ 									, threadId=thread['thread_id'])
+
 		threads[thread_key] = {"thread_id":msg['threadId'], "in_reply_to":msg['id']}

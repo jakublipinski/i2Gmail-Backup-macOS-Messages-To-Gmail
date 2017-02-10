@@ -52,50 +52,64 @@ class Gmail:
 
         message['Date'] = formatdate(time.mktime(date.timetuple()))
 
-        print message.as_string()
-
         return {'raw': base64.urlsafe_b64encode(message.as_string())}
 
     @staticmethod
-    def create_message_with_attachment(self, sender, to, subject, message_text,
-                                       file_dir, filename,
-                                       in_reply_to=None, references=None):
+    def create_message_with_attachments(id, sender, to, subject, date, message_text,
+                                       attachments, in_reply_to=None, references=None):
+        if not attachments:
+            return Gmail.create_message(id, sender, to, subject, date, message_text, in_reply_to, references)
+
         message = MIMEMultipart()
-        message['From'] = sender.encode('utf-8')
-        message['To'] = to.encode('utf-8')
-        message['Subject'] = subject.encode('utf-8')
+        message['Message-id'] = id
+        if in_reply_to:
+            message['In-Reply-To'] = in_reply_to
+        if references:
+            message['References'] = references
+        message['From'] = sender
+        message['To'] = to
+        message['Subject'] = subject
 
-        msg = MIMEText(message_text.encode('utf-8'), 'plain', 'utf-8')
+        message['Date'] = formatdate(time.mktime(date.timetuple()))
+
+        msg = MIMEText(message_text.encode('utf-8') if message_text else '', 'plain', 'utf-8')
         message.attach(msg)
 
-        path = os.path.join(file_dir, filename)
-        content_type, encoding = mimetypes.guess_type(path)
+        for attachment in attachments:
 
-        if content_type is None or encoding is not None:
-            content_type = 'application/octet-stream'
-        main_type, sub_type = content_type.split('/', 1)
-        if main_type == 'text':
-            fp = open(path, 'rb')
-            msg = MIMEText(fp.read(), _subtype=sub_type)
-            fp.close()
-        elif main_type == 'image':
-            fp = open(path, 'rb')
-            msg = MIMEImage(fp.read(), _subtype=sub_type)
-            fp.close()
-        elif main_type == 'audio':
-            fp = open(path, 'rb')
-            msg = MIMEAudio(fp.read(), _subtype=sub_type)
-            fp.close()
-        else:
-            fp = open(path, 'rb')
-            msg = MIMEBase(main_type, sub_type)
-            msg.set_payload(fp.read())
-            fp.close()
+            filename = attachment['filename']
+            content_type = attachment['mime_type']
+            transfer_name = attachment['transfer_name']
 
-        msg.add_header('Content-Disposition', 'attachment', filename=filename)
-        message.attach(msg)
+            if content_type is None:
+                content_type, encoding = mimetypes.guess_type(filename)
 
-        return {'raw': base64.b64encode(message.as_string())}
+            if content_type is None:
+                content_type = 'application/octet-stream'
+
+            main_type, sub_type = content_type.split('/', 1)
+            if main_type == 'text':
+                fp = open(filename, 'rb')
+                msg = MIMEText(fp.read(), _subtype=sub_type)
+                fp.close()
+            elif main_type == 'image':
+                fp = open(filename, 'rb')
+                msg = MIMEImage(fp.read(), _subtype=sub_type)
+                fp.close()
+            elif main_type == 'audio':
+                fp = open(filename, 'rb')
+                msg = MIMEAudio(fp.read(), _subtype=sub_type)
+                fp.close()
+            else:
+                fp = open(filename, 'rb')
+                msg = MIMEBase(main_type, sub_type)
+                msg.set_payload(fp.read())
+                fp.close()
+
+            msg.add_header('Content-Disposition', 'attachment', filename=transfer_name)
+            message.attach(msg)
+
+        return {'raw': base64.urlsafe_b64encode(message.as_string())}
 
     def create_label(self, user_id, label_object):
         """Creates a new label within user's mailbox, also prints Label ID.
