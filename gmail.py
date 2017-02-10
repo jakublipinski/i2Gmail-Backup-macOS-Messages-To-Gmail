@@ -28,27 +28,38 @@ class Gmail:
                 message['threadId'] = threadId
             if labelIds:
                 message['labelIds'] = labelIds
+
             message = self.gmail_client.users().messages().insert(
                 userId=user_id, body=message, internalDateSource="dateHeader").execute()
             print('Message Id: %s' % message['id'])
             return message
         except errors.HttpError, error:
             print('An error occurred: %s' % error)
+            raise
 
     @staticmethod
-    def create_message(id, sender, to, subject, date, message_text):
+    def create_message(id, sender, to, subject, date, message_text,
+                       in_reply_to=None, references=None):
         message = MIMEText(message_text.encode('utf-8') if message_text else '', 'plain', 'utf-8')
         message['Message-id'] = id
-        message['From'] = sender.encode('utf-8')
-        message['To'] = to.encode('utf-8')
-        message['Subject'] = subject.encode('utf-8')
+        if in_reply_to:
+            message['In-Reply-To'] = in_reply_to
+        if references:
+            message['References'] = references
+        message['From'] = sender
+        message['To'] = to
+        message['Subject'] = subject
 
         message['Date'] = formatdate(time.mktime(date.timetuple()))
-        return {'raw': base64.b64encode(message.as_string())}
+
+        print message.as_string()
+
+        return {'raw': base64.urlsafe_b64encode(message.as_string())}
 
     @staticmethod
     def create_message_with_attachment(self, sender, to, subject, message_text,
-                                       file_dir, filename):
+                                       file_dir, filename,
+                                       in_reply_to=None, references=None):
         message = MIMEMultipart()
         message['From'] = sender.encode('utf-8')
         message['To'] = to.encode('utf-8')

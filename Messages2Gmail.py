@@ -36,12 +36,14 @@ if __name__ == '__main__':
 	if 'Text' not in labels.keys():
 		gmail.create_label("me", Gmail.make_label('Text'))
 
-	i = 20
+	i = 19
+	threads = {}
 	for message in MessagesDB.get_messages(19285):
 		date = datetime.datetime(2015, 2, 28, 7, 45)
 
 		msg_id = '<%s_%s>' % (message['guid'], google_credentials.email)
 
+		print message['handle_id']
 		name = handle_to_name[message['handle_id']]
 		if message['is_from_me']:
 			sender = google_credentials.email
@@ -50,10 +52,19 @@ if __name__ == '__main__':
 			to = google_credentials.email
 			sender = name
 
-		subject = "Chat with %s"%name
+		subject = "Chat with %s" % (name)
 		date = datetime.datetime.fromtimestamp(978307200 + message['date'])
 
+#		thread_id = '<%s_%s_%s>' % (date.strftime("%d%m%Y"),
+#									message['handle_id'],
+#									google_credentials.email)
+
+		thread_key = '%s_%s' % (date.strftime("%d%m%Y"),
+								message['handle_id'])
+		thread = threads.get(thread_key, {"thread_id":None, "in_reply_to":None})
+
 		print msg_id
+		print thread
 		print sender.encode('utf-8')
 		print to.encode('utf-8')
 		print name.encode('utf-8')
@@ -61,8 +72,13 @@ if __name__ == '__main__':
 		if message['text']:
 			print message['text'].encode('utf-8')
 
-		msg = Gmail.create_message(msg_id, sender, to, subject, date, message['text'])
-		gmail.insert_message(msg, labelIds=[labels['Text']])
+		msg = Gmail.create_message(msg_id, sender, to, subject, date, message['text'],
+								   in_reply_to=thread['in_reply_to'], references=thread['in_reply_to'])
+
+		msg = gmail.insert_message(msg, labelIds=[labels['Text']]
+							 , threadId=thread['thread_id']
+							 )
+		threads[thread_key] = {"thread_id":msg['threadId'], "in_reply_to":msg['id']}
 
 		i -= 1
 		if i==0:

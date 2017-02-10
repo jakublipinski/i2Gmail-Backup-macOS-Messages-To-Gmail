@@ -16,7 +16,7 @@ class MessagesDB:
 		for row in self.conn.cursor().execute(
 				'select ROWID, guid, text, handle_id, service, date, is_from_me ' \
 				'from message '\
-				'where ROWID>? '\
+				'where ROWID>? and handle_id>0 '\
 				'order by ROWID',(last_processed_rowid,)):
 			yield {'rowid':row[0], 'guid':row[1], 'text':row[2], 'handle_id':row[3],
 				   'service':row[4], 'date':row[5], 'is_from_me':row[6]}
