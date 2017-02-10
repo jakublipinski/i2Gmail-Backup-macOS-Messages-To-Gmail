@@ -34,13 +34,16 @@ class Contacts:
 			if entry.name:
 				full_name = entry.name.full_name.text
 
+				primary_email = None
 				for email_entry in entry.email:
 					email = email_entry.address.lower()
+					if email_entry.primary and email_entry.primary=="true":
+						primary_email = email
 					if email in self.email_to_name:
 						print("Email address: '%s' is assigned to both '%s' and '%s'!"%
 							  (email, self.email_to_name[email], full_name))
 					else:
-						self.email_to_name[email] = u'%s <%s>' % (full_name, email)
+						self.email_to_name[email] = (full_name, u'%s <%s>' % (full_name, email))
 
 				for phone_number_entry in entry.phone_number:
 					phone_number = Contacts.strip_and_reverse_phone_number(phone_number_entry.text)
@@ -48,7 +51,11 @@ class Contacts:
 						print("Phone number: '%s' is assigned to both '%s' and '%s'!"%
 							  (phone_number_entry.text, self.phone_to_name[phone_number], full_name))
 					else:
-						self.phone_to_name[phone_number] = u'%s <%s>' % (full_name, phone_number_entry.text)
+						if primary_email:
+							self.email_to_name[email] = (
+							full_name, u'%s <%s>' % (full_name, primary_email))
+						else:
+							self.phone_to_name[phone_number] = (full_name, u'%s <%s>' % (full_name, phone_number_entry.text))
 
 	def get_by_phone_number(self, phone_number):
 		phone_number = Contacts.strip_and_reverse_phone_number(phone_number)

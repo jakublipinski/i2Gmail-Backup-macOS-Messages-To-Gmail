@@ -24,13 +24,13 @@ if __name__ == '__main__':
 	for handle in MessagesDB.get_handles():
 		id = handle['id']
 		if '@' in id:
-			name = contacts.get_by_email(id)
+			names = contacts.get_by_email(id)
 		elif phone_number_reg.match(id):
-			name = contacts.get_by_phone_number(id)
-		if name:
-			handle_to_name[handle['rowid']] = name
+			names = contacts.get_by_phone_number(id)
+		if names:
+			handle_to_name[handle['rowid']] = names
 		else:
-			handle_to_name[handle['rowid']] = id
+			handle_to_name[handle['rowid']] = (id, id)
 
 	labels = gmail.get_labels("me")
 	if 'Text' not in labels.keys():
@@ -42,13 +42,13 @@ if __name__ == '__main__':
 
 		msg_id = '<%s_%s>' % (message['guid'], google_credentials.email)
 
-		name = handle_to_name[message['handle_id']]
+		name, name_and_address = handle_to_name[message['handle_id']]
 		if message['is_from_me']:
 			sender = google_credentials.email
-			to = name
+			to = name_and_address
 		else:
 			to = google_credentials.email
-			sender = name
+			sender = name_and_address
 
 		subject = "Chat with %s" % (name)
 		date = datetime.datetime.fromtimestamp(978307200 + message['date'])
