@@ -17,7 +17,9 @@ except ImportError:
 class GoogleCredentials:
 
     # Check https://developers.google.com/gmail/api/auth/scopes for all available scopes
-    OAUTH_SCOPE = ['https://www.googleapis.com/auth/gmail.insert',
+    OAUTH_SCOPE = ['https://www.googleapis.com/auth/userinfo.email',
+                   'https://www.googleapis.com/auth/gmail.insert',
+                   'https://www.googleapis.com/auth/gmail.labels',
                    'https://www.googleapis.com/auth/contacts.readonly']
 
     def authenticate(self):
@@ -41,3 +43,5 @@ class GoogleCredentials:
             else: # Needed only for compatibility with Python 2.6
 				self.credentials = tools.run(flow, store)
             print('Storing credentials to ' + config.CREDENTIALS_STORAGE_FILE)
+
+        self.email = self.credentials.id_token['email']
