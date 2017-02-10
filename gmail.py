@@ -46,9 +46,9 @@ class Gmail:
             message['In-Reply-To'] = in_reply_to
         if references:
             message['References'] = references
-        message['From'] = sender
-        message['To'] = to
-        message['Subject'] = subject
+        message['From'] = sender.encode('utf-8')
+        message['To'] = to.encode('utf-8')
+        message['Subject'] = subject.encode('utf-8')
 
         message['Date'] = formatdate(time.mktime(date.timetuple()))
 
@@ -66,9 +66,9 @@ class Gmail:
             message['In-Reply-To'] = in_reply_to
         if references:
             message['References'] = references
-        message['From'] = sender
-        message['To'] = to
-        message['Subject'] = subject
+        message['From'] = sender.encode('utf-8')
+        message['To'] = to.encode('utf-8')
+        message['Subject'] = subject.encode('utf-8')
 
         message['Date'] = formatdate(time.mktime(date.timetuple()))
 
