@@ -64,7 +64,7 @@ class MessagesDB:
 				msg['attachments'].append({'filename': filename,
 										   'mime_type':row['attachment_mime_type'],
 										   'transfer_name':row['attachment_transfer_name']})
-				attachments_set.add(row['attachment_rowid	'])
+				attachments_set.add(row['attachment_rowid'])
 			if row['chat_handle_id']:
 				msg['chat_handles'].add(row['chat_handle_id'])
 			row = c.fetchone()
