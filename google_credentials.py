@@ -1,11 +1,9 @@
 from __future__ import print_function
-import os
 import config
 
 import oauth2client
 from oauth2client import client
 from oauth2client import tools
-from apiclient import errors
 
 try:
     import argparse

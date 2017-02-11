@@ -1,4 +1,3 @@
-import atom.data
 import gdata.data
 import gdata.contacts.client
 import gdata.contacts.data
