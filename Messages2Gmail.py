@@ -20,9 +20,11 @@ if __name__ == '__main__':
 
 	# handle_id to Name cache
 	handle_to_name = {}
+	handle_to_id = {}
 	phone_number_reg = re.compile('^[a-z0-9\.\+ \(\)\+]+$')
 	for handle in MessagesDB.get_handles():
 		id = handle['id']
+		handle_to_id[handle['rowid']] = id
 		if '@' in id:
 			names = contacts.get_by_email(id)
 		elif phone_number_reg.match(id):
@@ -53,6 +55,7 @@ if __name__ == '__main__':
 		names_and_addressess = ''
 		thread_key = '%s' % date.strftime("%d%m%Y")
 
+		original_bearer = ''
 		chat_handles = list(message['chat_handles'])
 		chat_handles.sort()
 		no_of_handles = len(chat_handles)
@@ -64,22 +67,30 @@ if __name__ == '__main__':
 			if i == no_of_handles-1: # last element
 				names += name
 				names_and_addressess += name_and_address
+				original_bearer += handle_to_id[handle_id]
 			elif i == no_of_handles-2: # one before last handle
 				names += name + ' and '
 				names_and_addressess += name_and_address+'; '
+				original_bearer += handle_to_id[handle_id]+', '
 			else:
 				names += name + ', '
 				names_and_addressess += name_and_address+'; '
+				original_bearer += handle_to_id[handle_id]+', '
 
 		print thread_key
 
 		if message['is_from_me']:
 			sender = me
 			to = names_and_addressess
+			original_bearer = 'Sent via %s from %s to %s' % (message['service'],
+								'me', original_bearer)
+
 		else:
 			to = me
 			name, name_and_address = handle_to_name[message['handle_id']]
 			sender = name_and_address
+			original_bearer = 'Sent via %s from %s to %s' % (message['service'],
+								handle_to_id[message['handle_id']], original_bearer)
 
 		subject = "Chat with %s" % (names)
 
@@ -94,7 +105,9 @@ if __name__ == '__main__':
 			print message['attachments']
 
 		msg = Gmail.create_message_with_attachments(msg_id, sender, to, subject, date, message['text'], message['attachments'],
-								   in_reply_to=thread['in_reply_to'], references=thread['in_reply_to'])
+								   in_reply_to=thread['in_reply_to'], references=thread['in_reply_to'],
+								   extra_headers = {'X-Original-Bearer' : original_bearer,
+													'X-Mailer': 'Backup macOS Messages to Gmail; visit: https://github.com/jakublipinski/Backup-macOS-Messages-To-Gmail'})
 
 		msg = gmail.insert_message(msg, labelIds=[labels['Text']], threadId=thread['thread_id'])
 

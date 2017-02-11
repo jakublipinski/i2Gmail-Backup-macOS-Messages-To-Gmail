@@ -58,7 +58,8 @@ class Gmail:
 
     @staticmethod
     def create_message_with_attachments(id, sender, to, subject, date, message_text,
-                                       attachments, in_reply_to=None, references=None):
+                                       attachments, in_reply_to=None, references=None,
+                                        extra_headers = None):
         if attachments:
             message = MIMEMultipart()
         else:
@@ -76,6 +77,10 @@ class Gmail:
         message['Subject'] = subject.encode('utf-8')
 
         message['Date'] = formatdate(time.mktime(date.timetuple()))
+
+        if extra_headers:
+            for key, value in extra_headers.iteritems():
+                message[key] = value
 
         if attachments:
             msg = MIMEText(message_text.encode('utf-8') if message_text else '', 'plain', 'utf-8')
