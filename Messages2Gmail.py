@@ -12,7 +12,7 @@ settings = {}
 
 def save_settings():
 	with open(config.SETTINGS_FILE, 'w') as f:
-		json.dump(settings, f)
+		json.dump(settings, f, indent=4)
 
 
 def load_settings():
@@ -60,7 +60,6 @@ if __name__ == '__main__':
 
 	settings = load_settings()
 
-	threads = {}
 	for message in MessagesDB.get_messages(settings['last_rowid']):
 
 		print message
@@ -111,7 +110,7 @@ if __name__ == '__main__':
 
 		subject = "Chat with %s" % (names)
 
-		thread = threads.get(thread_key, {"thread_id":None, "in_reply_to":None})
+		thread = settings['threads'].get(thread_key, {"thread_id":None, "in_reply_to":None})
 
 		print sender.encode('utf-8')
 		print to.encode('utf-8')
@@ -128,7 +127,7 @@ if __name__ == '__main__':
 
 		msg = gmail.insert_message(msg, labelIds=[labels['Text']], threadId=thread['thread_id'])
 
-		threads[thread_key] = {"thread_id":msg['threadId'], "in_reply_to":msg['id']}
+		settings['threads'][thread_key] = {"thread_id":msg['threadId'], "in_reply_to":msg['id']}
 		print
 
 		settings['last_rowid'] = message['rowid']
