@@ -123,7 +123,7 @@ if __name__ == '__main__':
 		msg = Gmail.create_message_with_attachments(msg_id, sender, to, subject, date, message['text'], message['attachments'],
 								   in_reply_to=thread['in_reply_to'], references=thread['in_reply_to'],
 								   extra_headers = {'X-Original-Bearer' : original_bearer,
-													'X-Mailer': 'Backup macOS Messages to Gmail; visit: https://github.com/jakublipinski/Backup-macOS-Messages-To-Gmail'})
+													'X-Mailer': 'Backup macOS Messages to Gmail; visit: https://github.com/jakublipinski/i2Gmail-Backup-macOS-Messages-To-Gmail'})
 
 		msg = gmail.insert_message(msg, labelIds=[labels['Text']], threadId=thread['thread_id'])
 
