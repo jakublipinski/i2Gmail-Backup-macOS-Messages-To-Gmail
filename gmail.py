@@ -28,6 +28,8 @@ class Gmail:
             if labelIds:
                 message['labelIds'] = labelIds
 
+            print len(message['raw'])
+
             message = self.gmail_client.users().messages().insert(
                 userId=user_id, body=message, internalDateSource="dateHeader").execute()
             print('Message Id: %s' % message['id'])
@@ -37,29 +39,15 @@ class Gmail:
             raise
 
     @staticmethod
-    def create_message(id, sender, to, subject, date, message_text,
-                       in_reply_to=None, references=None):
-        message = MIMEText(message_text.encode('utf-8') if message_text else '', 'plain', 'utf-8')
-        message['Message-id'] = id
-        if in_reply_to:
-            message['In-Reply-To'] = in_reply_to
-        if references:
-            message['References'] = references
-        message['From'] = sender.encode('utf-8')
-        message['To'] = to.encode('utf-8')
-        message['Subject'] = subject.encode('utf-8')
-
-        message['Date'] = formatdate(time.mktime(date.timetuple()))
-
-        return {'raw': base64.urlsafe_b64encode(message.as_string())}
-
-    @staticmethod
     def create_message_with_attachments(id, sender, to, subject, date, message_text,
                                        attachments, in_reply_to=None, references=None):
-        if not attachments:
-            return Gmail.create_message(id, sender, to, subject, date, message_text, in_reply_to, references)
+        if attachments:
+            message = MIMEMultipart()
+        else:
+            message = MIMEText(
+                message_text.encode('utf-8') if message_text else '', 'plain',
+                'utf-8')
 
-        message = MIMEMultipart()
         message['Message-id'] = id
         if in_reply_to:
             message['In-Reply-To'] = in_reply_to
@@ -71,42 +59,43 @@ class Gmail:
 
         message['Date'] = formatdate(time.mktime(date.timetuple()))
 
-        msg = MIMEText(message_text.encode('utf-8') if message_text else '', 'plain', 'utf-8')
-        message.attach(msg)
-
-        for attachment in attachments:
-
-            filename = attachment['filename']
-            content_type = attachment['mime_type']
-            transfer_name = attachment['transfer_name']
-
-            if content_type is None:
-                content_type, encoding = mimetypes.guess_type(filename)
-
-            if content_type is None:
-                content_type = 'application/octet-stream'
-
-            main_type, sub_type = content_type.split('/', 1)
-            if main_type == 'text':
-                fp = open(filename, 'rb')
-                msg = MIMEText(fp.read(), _subtype=sub_type)
-                fp.close()
-            elif main_type == 'image':
-                fp = open(filename, 'rb')
-                msg = MIMEImage(fp.read(), _subtype=sub_type)
-                fp.close()
-            elif main_type == 'audio':
-                fp = open(filename, 'rb')
-                msg = MIMEAudio(fp.read(), _subtype=sub_type)
-                fp.close()
-            else:
-                fp = open(filename, 'rb')
-                msg = MIMEBase(main_type, sub_type)
-                msg.set_payload(fp.read())
-                fp.close()
-
-            msg.add_header('Content-Disposition', 'attachment', filename=transfer_name)
+        if attachments:
+            msg = MIMEText(message_text.encode('utf-8') if message_text else '', 'plain', 'utf-8')
             message.attach(msg)
+
+            for attachment in attachments:
+
+                filename = attachment['filename']
+                content_type = attachment['mime_type']
+                transfer_name = attachment['transfer_name']
+
+                if content_type is None:
+                    content_type, encoding = mimetypes.guess_type(filename)
+
+                if content_type is None:
+                    content_type = 'application/octet-stream'
+
+                main_type, sub_type = content_type.split('/', 1)
+                if main_type == 'text':
+                    fp = open(filename, 'rb')
+                    msg = MIMEText(fp.read(), _subtype=sub_type)
+                    fp.close()
+                elif main_type == 'image':
+                    fp = open(filename, 'rb')
+                    msg = MIMEImage(fp.read(), _subtype=sub_type)
+                    fp.close()
+                elif main_type == 'audio':
+                    fp = open(filename, 'rb')
+                    msg = MIMEAudio(fp.read(), _subtype=sub_type)
+                    fp.close()
+                else:
+                    fp = open(filename, 'rb')
+                    msg = MIMEBase(main_type, sub_type)
+                    msg.set_payload(fp.read())
+                    fp.close()
+
+                msg.add_header('Content-Disposition', 'attachment', filename=transfer_name)
+                message.attach(msg)
 
         return {'raw': base64.urlsafe_b64encode(message.as_string())}
 
