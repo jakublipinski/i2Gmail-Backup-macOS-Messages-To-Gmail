@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	contacts = Contacts(google_credentials.credentials)
 	contacts.load_contacts()
 
-	MessagesDB = MessagesDB('~/backup_messages_2017/')
+	MessagesDB = MessagesDB()
 
 	# handle_id to Name cache
 	handle_to_name = {}

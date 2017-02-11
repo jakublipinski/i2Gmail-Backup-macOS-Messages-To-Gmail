@@ -6,9 +6,11 @@ import sqlite3
 class MessagesDB:
 
 	def __init__(self, path = config.DEFAULT_MESSAGES_PATH):
-		user_dir = os.path.expanduser('~')
-		self.path = path.replace('~', user_dir)
-		print self.path + 'chat.db'
+		self.user_dir = os.path.expanduser('~')
+		self.path = path.replace('~', self.user_dir)
+		self.config_path = config.DEFAULT_MESSAGES_PATH.replace('~', self.user_dir)
+		print self.path
+		print self.config_path
 		self.conn = sqlite3.connect(self.path + 'chat.db')
 		self.conn.row_factory = sqlite3.Row
 
@@ -58,10 +60,11 @@ class MessagesDB:
 					   'chat_handles' : set()}
 				attachments_set = set()
 			if row['attachment_rowid'] and row['attachment_rowid'] not in attachments_set:
-				filename = row['attachment_filename']
-				if self.path != config.DEFAULT_MESSAGES_PATH:
-					filename = self.path + filename[-len(filename)+len(config.DEFAULT_MESSAGES_PATH):]
-				msg['attachments'].append({'filename': filename,
+				filename = row['attachment_filename'].replace('~', self.user_dir)
+				if self.path != self.config_path:
+					filename = self.path + filename[-len(filename)+len(self.config_path):]
+				if os.path.exists(filename):
+					msg['attachments'].append({'filename': filename,
 										   'mime_type':row['attachment_mime_type'],
 										   'transfer_name':row['attachment_transfer_name']})
 				attachments_set.add(row['attachment_rowid'])
