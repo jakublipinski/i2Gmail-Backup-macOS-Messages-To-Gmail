@@ -1,12 +1,13 @@
 import time
 
-import base64
+import base64, io
 from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
+import googleapiclient
 import mimetypes
 
 import httplib2
@@ -23,15 +24,32 @@ class Gmail:
 
     def insert_message(self, message, user_id='me', threadId=None, labelIds=None):
         try:
-            if threadId:
-                message['threadId'] = threadId
-            if labelIds:
-                message['labelIds'] = labelIds
+            print 'Message size: %d' % len(message['raw'])
 
-            print len(message['raw'])
+            if len(message['raw']) < 2000000:
+                if threadId:
+                    message['threadId'] = threadId
+                if labelIds:
+                    message['labelIds'] = labelIds
 
-            message = self.gmail_client.users().messages().insert(
-                userId=user_id, body=message, internalDateSource="dateHeader").execute()
+                message = self.gmail_client.users().messages().insert(
+                    userId=user_id, body=message, internalDateSource="dateHeader").execute()
+            else:
+                b = io.BytesIO()
+                message_bytes = base64.urlsafe_b64decode(str(message['raw']))
+                b.write(message_bytes)
+                body = {}
+                if threadId:
+                    body['threadId'] = threadId
+                if labelIds:
+                    body['labelIds'] = labelIds
+                media_body = googleapiclient.http.MediaIoBaseUpload(b,
+                                                    mimetype='message/rfc822')
+                message = self.gmail_client.users().messages().insert(userId=user_id,
+                                                    body=body,
+                                                    internalDateSource="dateHeader",
+                                                    media_body=media_body).execute()
+
             print('Message Id: %s' % message['id'])
             return message
         except errors.HttpError, error:

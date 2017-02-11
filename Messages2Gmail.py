@@ -92,7 +92,6 @@ if __name__ == '__main__':
 			print message['text'].encode('utf-8')
 		if message['attachments']:
 			print message['attachments']
-		print
 
 		msg = Gmail.create_message_with_attachments(msg_id, sender, to, subject, date, message['text'], message['attachments'],
 								   in_reply_to=thread['in_reply_to'], references=thread['in_reply_to'])
@@ -100,3 +99,4 @@ if __name__ == '__main__':
 		msg = gmail.insert_message(msg, labelIds=[labels['Text']], threadId=thread['thread_id'])
 
 		threads[thread_key] = {"thread_id":msg['threadId'], "in_reply_to":msg['id']}
+		print
