@@ -28,6 +28,7 @@ class MessagesDB:
 			'message.service as message_service, '\
 			'message.date as message_date, '\
 			'message.is_from_me as message_is_from_me, '\
+			'attachment.rowid as attachment_rowid, '\
 			'attachment.filename as attachment_filename, '\
 			'attachment.mime_type as attachment_mime_type, '\
 			'attachment.transfer_name as attachment_transfer_name, '\
@@ -55,13 +56,15 @@ class MessagesDB:
 					   'is_from_me': row['message_is_from_me'],
 				 	   'attachments' : [],
 					   'chat_handles' : set()}
-			if row['attachment_filename']:
+				attachments_set = set()
+			if row['attachment_rowid'] and row['attachment_rowid'] not in attachments_set:
 				filename = row['attachment_filename']
 				if self.path != config.DEFAULT_MESSAGES_PATH:
 					filename = self.path + filename[-len(filename)+len(config.DEFAULT_MESSAGES_PATH):]
 				msg['attachments'].append({'filename': filename,
 										   'mime_type':row['attachment_mime_type'],
 										   'transfer_name':row['attachment_transfer_name']})
+				attachments_set.add(row['attachment_rowid	'])
 			if row['chat_handle_id']:
 				msg['chat_handles'].add(row['chat_handle_id'])
 			row = c.fetchone()
