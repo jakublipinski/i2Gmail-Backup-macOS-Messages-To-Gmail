@@ -38,23 +38,46 @@ if __name__ == '__main__':
 
 	threads = {}
 	for message in MessagesDB.get_messages(19285):
-		date = datetime.datetime(2015, 2, 28, 7, 45)
+
+		print message
 
 		msg_id = '<%s_%s>' % (message['guid'], google_credentials.email)
-
-		name, name_and_address = handle_to_name[message['handle_id']]
-		if message['is_from_me']:
-			sender = google_credentials.email
-			to = name_and_address
-		else:
-			to = google_credentials.email
-			sender = name_and_address
-
-		subject = "Chat with %s" % (name)
 		date = datetime.datetime.fromtimestamp(978307200 + message['date'])
 
-		thread_key = '%s_%s' % (date.strftime("%d%m%Y"),
-								message['handle_id'])
+		names = ''
+		names_and_addressess = ''
+		thread_key = '%s' % date.strftime("%d%m%Y")
+
+		chat_handles = list(message['chat_handles'])
+		chat_handles.sort()
+		no_of_handles = len(chat_handles)
+		for i in range(0, no_of_handles):
+			handle_id = chat_handles[i]
+			thread_key += '_%s' % handle_id
+			name, name_and_address = handle_to_name[handle_id]
+			print '%s %s %s' % (handle_id, name, name_and_address)
+			if i == no_of_handles-1: # last element
+				names += name
+				names_and_addressess += name_and_address
+			elif i == no_of_handles-2: # one before last handle
+				names += name + ' and '
+				names_and_addressess += name_and_address+'; '
+			else:
+				names += name + ', '
+				names_and_addressess += name_and_address+'; '
+
+		print thread_key
+
+		if message['is_from_me']:
+			sender = google_credentials.email
+			to = names_and_addressess
+		else:
+			to = google_credentials.email
+			name, name_and_address = handle_to_name[message['handle_id']]
+			sender = name_and_address
+
+		subject = "Chat with %s" % (names)
+
 		thread = threads.get(thread_key, {"thread_id":None, "in_reply_to":None})
 
 		print sender.encode('utf-8')
@@ -69,7 +92,6 @@ if __name__ == '__main__':
 		msg = Gmail.create_message_with_attachments(msg_id, sender, to, subject, date, message['text'], message['attachments'],
 								   in_reply_to=thread['in_reply_to'], references=thread['in_reply_to'])
 
-		msg = gmail.insert_message(msg, labelIds=[labels['Text']]
- 									, threadId=thread['thread_id'])
+		msg = gmail.insert_message(msg, labelIds=[labels['Text']], threadId=thread['thread_id'])
 
 		threads[thread_key] = {"thread_id":msg['threadId'], "in_reply_to":msg['id']}

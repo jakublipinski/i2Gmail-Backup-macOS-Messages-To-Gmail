@@ -10,6 +10,7 @@ class MessagesDB:
 		self.path = path.replace('~', user_dir)
 		print self.path + 'chat.db'
 		self.conn = sqlite3.connect(self.path + 'chat.db')
+		self.conn.row_factory = sqlite3.Row
 
 	def get_handles(self):
 		for row in self.conn.cursor().execute('select ROWID, id from handle'):
@@ -17,29 +18,54 @@ class MessagesDB:
 
 	def get_messages(self, last_processed_rowid = 0):
 
-		attachments = []
-		c = self.conn.cursor().execute(
-				'select message.ROWID, message.guid, message.text, message.handle_id, message.service, message.date, message.is_from_me, '
-				'attachment.filename, attachment.mime_type, attachment.transfer_name ' \
-				'from message '
-				'left OUTER JOIN message_attachment_join on message.ROWID = message_attachment_join.message_id '
-				'left OUTER join attachment on message_attachment_join.attachment_id = attachment.ROWID '\
-				'where message.ROWID>? and handle_id>0 '\
-				'order by message.ROWID',(last_processed_rowid,))
+		query = \
+			'select  ' \
+			'message.ROWID as message_ROWID, '\
+			'message.guid as message_guid, '\
+			'message.text as message_text, '\
+			'message.handle_id as message_handle_id, '\
+			'message.other_handle as message_other_handle,'\
+			'message.service as message_service, '\
+			'message.date as message_date, '\
+			'message.is_from_me as message_is_from_me, '\
+			'attachment.filename as attachment_filename, '\
+			'attachment.mime_type as attachment_mime_type, '\
+			'attachment.transfer_name as attachment_transfer_name, '\
+			'chat_handle_join.handle_id as chat_handle_id ' \
+			'from message '\
+			'left OUTER JOIN message_attachment_join on message.ROWID = message_attachment_join.message_id '\
+			'left OUTER join attachment on message_attachment_join.attachment_id = attachment.ROWID '\
+			'left OUTER JOIN chat_message_join on message.ROWID=chat_message_join.message_id ' \
+			'left OUTER JOIN chat_handle_join on chat_message_join.chat_id = chat_handle_join.chat_id ' \
+			'where message.ROWID>%d ' \
+			'order by message.ROWID, chat_handle_join.handle_id' % (last_processed_rowid)
+
+		c = self.conn.cursor().execute(query)
+
 		msg = {'rowid':-1}
 		row = c.fetchone()
 		while row:
-			if msg['rowid'] != row[0]:
-				msg = {'rowid': row[0], 'guid': row[1], 'text': row[2],
-				 'handle_id': row[3],
-				 'service': row[4], 'date': row[5], 'is_from_me': row[6],
-				 'attachments' : [] }
-			if row[7]:
-				filename = row[7]
+			if msg['rowid'] != row['message_ROWID']:
+				msg = {'rowid': row['message_ROWID'],
+					   'guid': row['message_guid'],
+					   'text': row['message_text'],
+				 	   'handle_id': row['message_handle_id'] or row['message_other_handle'],
+					   'service': row['message_service'],
+					   'date': row['message_date'],
+					   'is_from_me': row['message_is_from_me'],
+				 	   'attachments' : [],
+					   'chat_handles' : set()}
+			if row['attachment_filename']:
+				filename = row['attachment_filename']
 				if self.path != config.DEFAULT_MESSAGES_PATH:
 					filename = self.path + filename[-len(filename)+len(config.DEFAULT_MESSAGES_PATH):]
-				msg['attachments'].append({'filename': filename, 'mime_type':row[8],
-										   'transfer_name':row[9]})
+				msg['attachments'].append({'filename': filename,
+										   'mime_type':row['attachment_mime_type'],
+										   'transfer_name':row['attachment_transfer_name']})
+			if row['chat_handle_id']:
+				msg['chat_handles'].add(row['chat_handle_id'])
 			row = c.fetchone()
-			if not row or msg['rowid'] != row[0]:
+			if not row or msg['rowid'] != row['message_ROWID']:
+				if msg['handle_id'] != 0:
+					msg['chat_handles'].add(msg['handle_id'])
 				yield msg
