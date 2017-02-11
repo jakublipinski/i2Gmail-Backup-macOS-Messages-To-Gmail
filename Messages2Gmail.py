@@ -32,6 +32,11 @@ if __name__ == '__main__':
 		else:
 			handle_to_name[handle['rowid']] = (id, id)
 
+	if contacts.get_by_email(google_credentials.email):
+		me = contacts.get_by_email(google_credentials.email)[1]
+	else:
+		me = google_credentials.email
+
 	labels = gmail.get_labels("me")
 	if 'Text' not in labels.keys():
 		gmail.create_label("me", Gmail.make_label('Text'))
@@ -69,10 +74,10 @@ if __name__ == '__main__':
 		print thread_key
 
 		if message['is_from_me']:
-			sender = google_credentials.email
+			sender = me
 			to = names_and_addressess
 		else:
-			to = google_credentials.email
+			to = me
 			name, name_and_address = handle_to_name[message['handle_id']]
 			sender = name_and_address
 
