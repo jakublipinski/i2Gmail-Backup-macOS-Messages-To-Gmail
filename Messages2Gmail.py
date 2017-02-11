@@ -4,8 +4,23 @@ from google_credentials import GoogleCredentials
 from gmail import Gmail
 from contacts import Contacts
 from MessagesDB import MessagesDB
+import json
+import config
 
-# q= rfc822msgid:kuku7@messages2gmail.com
+settings = {}
+
+
+def save_settings():
+	with open(config.SETTINGS_FILE, 'w') as f:
+		json.dump(settings, f)
+
+
+def load_settings():
+	try:
+		with open(config.SETTINGS_FILE, 'r') as f:
+			return json.load(f)
+	except Exception:
+		return {'last_rowid' : 0}
 
 if __name__ == '__main__':
 	google_credentials = GoogleCredentials()
@@ -43,8 +58,10 @@ if __name__ == '__main__':
 	if 'Text' not in labels.keys():
 		gmail.create_label("me", Gmail.make_label('Text'))
 
+	settings = load_settings()
+
 	threads = {}
-	for message in MessagesDB.get_messages(19285):
+	for message in MessagesDB.get_messages(settings['last_rowid']):
 
 		print message
 
@@ -113,3 +130,6 @@ if __name__ == '__main__':
 
 		threads[thread_key] = {"thread_id":msg['threadId'], "in_reply_to":msg['id']}
 		print
+
+		settings['last_rowid'] = message['rowid']
+		save_settings()
