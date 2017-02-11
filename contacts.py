@@ -52,7 +52,7 @@ class Contacts:
 							  (phone_number_entry.text, self.phone_to_name[phone_number], full_name))
 					else:
 						if primary_email:
-							self.email_to_name[email] = (
+							self.phone_to_name[phone_number] = (
 							full_name, u'%s <%s>' % (full_name, primary_email))
 						else:
 							self.phone_to_name[phone_number] = (full_name, u'%s <%s>' % (full_name, phone_number_entry.text))
