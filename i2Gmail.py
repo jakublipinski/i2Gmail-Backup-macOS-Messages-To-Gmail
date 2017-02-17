@@ -20,7 +20,7 @@ def load_settings():
 		with open(config.SETTINGS_FILE, 'r') as f:
 			return json.load(f)
 	except Exception:
-		return {'last_rowid' : 0}
+		return {'last_rowid' : 0, 'threads': {} }
 
 if __name__ == '__main__':
 	google_credentials = GoogleCredentials()
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 		me = google_credentials.email
 
 	labels = gmail.get_labels("me")
-	if 'Text' not in labels.keys():
+	if config.GMAIL_LABEL not in labels.keys():
 		gmail.create_label("me", Gmail.make_label(config.GMAIL_LABEL))
 
 	settings = load_settings()
@@ -125,7 +125,7 @@ if __name__ == '__main__':
 								   extra_headers = {'X-Original-Bearer' : original_bearer,
 													'X-Mailer': 'Backup macOS Messages to Gmail; visit: https://github.com/jakublipinski/i2Gmail-Backup-macOS-Messages-To-Gmail'})
 
-		msg = gmail.insert_message(msg, labelIds=[labels['Text']], threadId=thread['thread_id'])
+		msg = gmail.insert_message(msg, labelIds=[labels[config.GMAIL_LABEL]], threadId=thread['thread_id'])
 
 		settings['threads'][thread_key] = {"thread_id":msg['threadId'], "in_reply_to":msg['id']}
 		print
