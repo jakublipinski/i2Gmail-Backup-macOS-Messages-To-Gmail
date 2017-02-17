@@ -1,5 +1,7 @@
 # Backup macOS Messages to Gmail
 
+Have you ever lost your phone and all your important text messages? Have you ever struggled with finding a very important  message in your iMessage application? Is Gmail your main e-mail client? Check out i2Gmail!
+
 i2Gmail is a Python utility which allows you to backup your iMessages from your macOS desktop computer to your Gmail account. If your macOS computer is [configured to send and receive SMS messages](https://support.apple.com/en-us/HT202549) they will also be backed up. Messages are stored on Gmail as regular emails. They are already read, archived, labeled as `Text` and easily searchable.
 
 Please note: i2Gmail is in beta. Expect hick-ups. Please [report all the issues](https://github.com/jakublipinski/i2Gmail-Backup-macOS-Messages-To-Gmail/issues).
