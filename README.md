@@ -17,13 +17,21 @@ cd i2Gmail
 ```
 easy_install --upgrade google-api-python-client
 ```
-### Create your Google Console project 
+### Create your `client_secrets.json` file 
 
 1. Go to [Google APIs Console](https://console.developers.google.com/flows/enableapi?apiid=gmail,contacts&credential=client_key)
-  1. Verify that `Create a project` is selected
-  2. Click the `Continue` button
-  3. Within a few seconds, your project will be created. Click the `Go to Credentials`
-  and the screen will display a confirmation message. On the confirmation screen, verify that all of the required APIs listed below are included. (Other APIs may also be enabled. You may ignore them.)
+2. Verify that `Create a project` is selected
+3. Click the `Continue` button
+4. Within a few seconds, your project will be created. Click the `Go to Credentials`.
+5. Click the `Credentials` from the menu on the left side.
+6. Go to the `OAuth consent screen` tab.
+7. Enter `i2Gmail` into the `Product name shown to users` box. Press `Save`.
+8. Go to the `Credentials` tab if not taken there automatically.
+9. Click the 'Create credentials` blue button dropdown and select `OAuth client ID`.
+10. Select `Other` from the list, enter `Console client` into `Name` field and press `Create`.
+11. Close the pop-up window.
+12. Click the `Download JSON` arrow located on the right side of the `Console client` label.
+13. Save the file into the `i2Gmail` folder as `client_secrets.json`
 
 
 Required APIs:
