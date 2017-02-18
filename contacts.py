@@ -69,8 +69,10 @@ class Contacts:
 
 	@staticmethod
 	def strip_and_reverse_phone_number(phone_number):
-		phone_number = ''.join(ch for ch in phone_number if ch.isdigit())
-		phone_number = phone_number[-9:]
-		phone_number = phone_number[::-1]
-		return phone_number
+		number = ''.join(ch for ch in phone_number if ch.isdigit())
+		if len(number)<3:
+			return phone_number
+		number = number[-9:]
+		number = number[::-1]
+		return number
 
