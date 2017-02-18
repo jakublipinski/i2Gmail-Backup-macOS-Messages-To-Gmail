@@ -2,15 +2,15 @@
 
 Have you ever lost your phone and all your important text messages? Have you ever struggled with finding a very important  message in your iMessage application? Is Gmail your main e-mail client? Check out i2Gmail!
 
-i2Gmail is a Python utility which allows you to backup your iMessages from your macOS desktop computer to your Gmail account. If your macOS computer is [configured to send and receive SMS messages](https://support.apple.com/en-us/HT202549) they will also be backed up. Messages are stored on Gmail as regular emails. They are already read, archived, labeled as `Text` and easily searchable.
+i2Gmail is a Python utility which allows you to backup your iMessages from your macOS desktop computer to your Gmail account. If your macOS computer is [configured to send and receive SMS messages](https://support.apple.com/en-us/HT202549), your SMS messages will be backed up as well. Messages are stored on Gmail as regular emails. They are already read, archived, labeled as `Text` and easily searchable.
 
 Please note: i2Gmail is in beta. Expect hick-ups. Please [report all the issues](https://github.com/jakublipinski/i2Gmail-Backup-macOS-Messages-To-Gmail/issues).
 
 ## Installation
 
-In order to use i2Gmail you will need:
+In order to use i2Gmail you will need to:
 
-### Clone the i2Gmail repository:
+### Clone the i2Gmail repository
 ```
 git clone git@github.com:jakublipinski/i2Gmail-Backup-macOS-Messages-To-Gmail.git i2Gmail
 cd i2Gmail
@@ -20,7 +20,7 @@ cd i2Gmail
 easy_install --upgrade google-api-python-client
 ```
 ### Create your `client_secrets.json` file 
-For i2Gmail to connect to your GMail account you need to create a new application at Google APIs Console.
+For i2Gmail to connect to your Gmail account you need to create a new application at Google APIs Console.
 
 1. Go to [Google APIs Console](https://console.developers.google.com/flows/enableapi?apiid=gmail,contacts&credential=client_key)
 2. Verify that `Create a project` is selected
@@ -47,38 +47,44 @@ i2Gmail labals all the backed up messages with `Text`. If you already use such l
 ### First backup
 
 To start backup run:
-`python i2Gmail.py`
-A browser will start asking to authorize the application against GMail. Choose the desired account and authorize the script. The backup procedure will start. The script will output its progress to the console.
+```
+python i2Gmail.py
+```
+A browser window will open asking to authorize the application against GMail. Choose the desired account and authorize the script. The backup procedure will start. The script will output its progress to the console. You can also follow the backup progress by searching for `label:text` in your Gmail account.
 
 ### Subsequent backup
 
 To start subsequent backup run:
-`python i2Gmail.py`
-i2Gmail stores the last backed up message id in the file `settings.json` and backups only new messages.
+```
+python i2Gmail.py
+```
+i2Gmail stores the last backed up message id in the file `settings.json` and backs up only new messages.
 
 ### Contacts Suggestions 
 
-i2Gmail outputs duplicate email addresses and phone number which are assigned to different contacts. It's recommened to fix these duplicates so that i2Gmail assigns correct contact deails to each message.
+i2Gmail outputs duplicate email addresses and phone number which are assigned to different contacts. It's recommened to fix these duplicates so that i2Gmail assigns correct contact details to each message.
 
 ### Restarting backup
 
 In order to start backup from scratch:
 1. Remove the `settings.json` file
-`rm settings.json`
-2. Remove previously backed up messages from Gmail by search `label:Text`, selecting all messages and pressing `Delete` button
+```
+rm settings.json
+```
+2. Remove previously backed up messages from Gmail by searching `label:text`, selecting all messages and pressing `Delete` button
 
-### Changing the GMail account
+### Changing the Gmail account
 
 In order to change the Gmail account to which the backup is performed delete the `credentials.storage` file. You will be asked to choose and authorize your Gmail account next time you run the script.
 
 ### Search your backed up messages.
 
-You can search your backed up messages by ussing `label:text` search query. You can combine it with other queries such as: `label:text from:me`, `label:text to:John`, etc
+You can search your backed up messages by ussing `label:text` search query in Gmail. You can combine it with other queries such as: `label:text from:me`, `label:text to:John`, etc
 
 ## Security
 
 ### Credentials needed
-Application needs following GMail permissions:
+Application needs following Gmail permissions:
 `Know who you are on Google` - to use your first and last name to indicate sender of your messages
 `View your email address`	- to use your email address to indicate sender of your messages
 `Insert mail into your mailbox`	- to backup your messages
@@ -87,7 +93,7 @@ Application needs following GMail permissions:
 
 ### Keep your files secured
 
-Keep your `clients_secrets.json` and `credentials.storage` files secured. They give access to your GMail account.
+Keep your `clients_secrets.json` and `credentials.storage` files secured. They give access to your Gmail account.
 
 ## Under the hood
 
