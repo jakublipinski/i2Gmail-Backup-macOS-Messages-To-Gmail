@@ -20,6 +20,7 @@ cd i2Gmail
 easy_install --upgrade google-api-python-client
 ```
 ### Create your `client_secrets.json` file 
+For i2Gmail to connect to your GMail account you need to create a new application at Google APIs Console.
 
 1. Go to [Google APIs Console](https://console.developers.google.com/flows/enableapi?apiid=gmail,contacts&credential=client_key)
 2. Verify that `Create a project` is selected
@@ -35,29 +36,61 @@ easy_install --upgrade google-api-python-client
 12. Click the `Download JSON` arrow located on the right side of the `Console client` label.
 13. Save the file into the `i2Gmail` folder as `client_secrets.json`
 
+### Add your phone number and email to Gmail Contacts
+Add your phone number and all your email addresses you use with iMessage to [Gmail Contacts](https://www.google.com/contacts/). 
 
-Required APIs:
-Admin SDK
-Apps Activity API
+### i2Gmail uses `Text` label
+i2Gmail labals all the backed up messages with `Text`. If you already use such label, it's strongly recommened to change it to something else. You can change the label name in the `config.py` by modifing the `GMAIL_LABEL` variable.
 
+## Backuping your Messages
 
+### First backup
 
-Create a new project
+To start backup run:
+`python i2Gmail.py`
+A browser will start asking to authorize the application against GMail. Choose the desired account and authorize the script. The backup procedure will start. The script will output its progress to the console.
 
-Add "OAuth client ID"
-Choose Other
+### Subsequent backup
 
-client_secrets.json
+To start subsequent backup run:
+`python i2Gmail.py`
+i2Gmail stores the last backed up message id in the file `settings.json` and backups only new messages.
 
---noauth_local_webserver
+### Contacts Suggestions 
 
-add your email to contacts
+i2Gmail outputs duplicate email addresses and phone number which are assigned to different contacts. It's recommened to fix these duplicates so that i2Gmail assigns correct contact deails to each message.
 
-https://stackoverflow.com/questions/27870024/google-gmail-api-installed-app-shows-ioerror-13-from-module-ssl-py-w-o-sudo
-sudo chmod o+r /Library/Python/2.7/site-packages/httplib2-0.9.1-py2.7.egg/httplib2/cacerts.txt
+### Restarting backup
 
-contacts - emails instead of phone numbers (show original)
+In order to start backup from scratch:
+1. Remove the `settings.json` file
+`rm settings.json`
+2. Remove previously backed up messages from Gmail by search `label:Text`, selecting all messages and pressing `Delete` button
 
+### Changing the GMail account
 
+In order to change the Gmail account to which the backup is performed delete the `credentials.storage` file. You will be asked to choose and authorize your Gmail account next time you run the script.
 
-original Bearer
+### Search your backed up messages.
+
+You can search your backed up messages by ussing `label:text` search query. You can combine it with other queries such as: `label:text from:me`, `label:text to:John`, etc
+
+## Security
+
+### Credentials needed
+Application needs following GMail permissions:
+`Know who you are on Google` - to use your first and last name to indicate sender of your messages
+`View your email address`	- to use your email address to indicate sender of your messages
+`Insert mail into your mailbox`	- to backup your messages
+`Manage mailbox labels` - to create `Text` label
+`View your contacts` - to translate phone numbers and email addresses to people names
+
+### Keep your files secured
+
+Keep your `clients_secrets.json` and `credentials.storage` files secured. They give access to your GMail account.
+
+## Under the hood
+
+### Original bearer
+
+If you need to learn what was the original bearer of the message (SMS or iMessage) you can click `Show original` options from the dropdown menu next to your message and loook for `X-Original-Bearer` header.
