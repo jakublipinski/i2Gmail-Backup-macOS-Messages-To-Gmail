@@ -9,8 +9,6 @@ class MessagesDB:
 		self.user_dir = os.path.expanduser('~')
 		self.path = path.replace('~', self.user_dir)
 		self.config_path = config.DEFAULT_MESSAGES_PATH.replace('~', self.user_dir)
-		print self.path
-		print self.config_path
 		self.conn = sqlite3.connect(self.path + 'chat.db')
 		self.conn.row_factory = sqlite3.Row
 
