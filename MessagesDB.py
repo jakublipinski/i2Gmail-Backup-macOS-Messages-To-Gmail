@@ -57,7 +57,8 @@ class MessagesDB:
 				 	   'attachments' : [],
 					   'chat_handles' : set()}
 				attachments_set = set()
-			if row['attachment_rowid'] and row['attachment_rowid'] not in attachments_set:
+			if row['attachment_rowid'] and row['attachment_rowid'] not in attachments_set\
+					and row['attachment_filename']:
 				filename = row['attachment_filename'].replace('~', self.user_dir)
 				if self.path != self.config_path:
 					filename = self.path + filename[-len(filename)+len(self.config_path):]
