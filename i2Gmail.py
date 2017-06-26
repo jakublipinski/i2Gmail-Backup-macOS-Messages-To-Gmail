@@ -1,3 +1,4 @@
+# -*- coding:utf-8 -*-
 import datetime, re
 
 from google_credentials import GoogleCredentials
@@ -79,7 +80,7 @@ if __name__ == '__main__':
 			handle_id = chat_handles[i]
 			thread_key += '_%s' % handle_id
 			name, name_and_address = handle_to_name[handle_id]
-			print '%s %s %s' % (handle_id, name, name_and_address)
+			print u'%s %s %s'.format (handle_id, name.encode('utf-8'), name_and_address.encode('utf-8'))
 			if i == no_of_handles-1: # last element
 				names += name
 				names_and_addressess += name_and_address
