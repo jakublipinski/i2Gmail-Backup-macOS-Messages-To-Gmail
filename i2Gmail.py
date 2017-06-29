@@ -56,7 +56,7 @@ if __name__ == '__main__':
 		me = google_credentials.email
 
 	labels = gmail.get_labels("me")
-	if config.GMAIL_LABEL not in labels.values():
+	if config.GMAIL_LABEL not in labels.keys():
 		gmail.create_label("me", Gmail.make_label(config.GMAIL_LABEL))
 
 	settings = load_settings()
