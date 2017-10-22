@@ -39,7 +39,7 @@ class Contacts:
 					if email_entry.primary and email_entry.primary=="true":
 						primary_email = email
 					if email in self.email_to_name:
-						print("Email address: '%s' is assigned to both '%s' and '%s'!"%
+						print(u"Email address: '%s' is assigned to both '%s' and '%s'!"%
 							  (email, self.email_to_name[email], full_name))
 					else:
 						self.email_to_name[email] = (full_name, u'%s <%s>' % (full_name, email))
