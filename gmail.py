@@ -1,6 +1,6 @@
 import time
 
-import base64, io
+import base64, io, os
 from email.mime.audio import MIMEAudio
 from email.mime.base import MIMEBase
 from email.mime.image import MIMEImage
@@ -12,6 +12,8 @@ import mimetypes
 
 import httplib2
 from apiclient import discovery, errors
+
+MAX_FILE_SIZE = 50000000 / 4 * 3 #base64 encoding
 
 class Gmail:
 
@@ -55,6 +57,31 @@ class Gmail:
         except errors.HttpError, error:
             print('An error occurred: %s' % error)
             raise
+
+    @staticmethod
+    def create_messages_with_attachments(id, sender, to, subject, date, message_text,
+                                       attachments, in_reply_to=None, references=None,
+                                        extra_headers = None):
+        if attachments:
+            msgs = []
+            atts = []
+            total_size = 0
+            for i in range(0,len(attachments)):
+                attachment = attachments[i]
+                atts.append(attachment)
+                total_size += os.stat(attachment['filename']).st_size
+                if i == len(attachments)-1 or total_size + os.stat(attachments[i+1]['filename']).st_size > MAX_FILE_SIZE:
+                    msgs.append(Gmail.create_message_with_attachments(id, sender, to, subject, date, message_text,
+                                       atts, in_reply_to=in_reply_to, references=references,
+                                        extra_headers = extra_headers))
+                    atts = []
+                    total_size = 0
+
+            return msgs
+        else:
+            return [Gmail.create_message_with_attachments(id, sender, to, subject, date, message_text,
+                                       attachments, in_reply_to=in_reply_to, references=references,
+                                        extra_headers = extra_headers)]
 
     @staticmethod
     def create_message_with_attachments(id, sender, to, subject, date, message_text,
