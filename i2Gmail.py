@@ -66,7 +66,7 @@ if __name__ == '__main__':
 		print message
 
 		msg_id = '<%s_%s>' % (message['guid'], google_credentials.email)
-		date = datetime.datetime.fromtimestamp(978307200 + message['date'])
+		date = datetime.datetime.fromtimestamp(978307200 + message['date']/1000000000)
 
 		names = ''
 		names_and_addressess = ''
