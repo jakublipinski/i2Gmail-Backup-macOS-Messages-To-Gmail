@@ -19,6 +19,12 @@ cd i2Gmail
 ```
 easy_install --upgrade google-api-python-client
 ```
+### Alternatively use virtual env
+```
+virtualenv -p /usr/bin/python2.7 venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
 ### Create your `client_secrets.json` file 
 For i2Gmail to connect to your Gmail account you need to create a new application at Google APIs Console.
 
