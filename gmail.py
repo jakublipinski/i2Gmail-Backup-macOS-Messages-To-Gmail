@@ -2,7 +2,7 @@ import time
 
 import base64, io, os
 from email.mime.audio import MIMEAudio
-from email.mime.base import MIMEBase
+from email.mime.application import MIMEApplication
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -140,8 +140,7 @@ class Gmail:
                     fp.close()
                 else:
                     fp = open(filename, 'rb')
-                    msg = MIMEBase(main_type, sub_type)
-                    msg.set_payload(fp.read())
+                    msg = MIMEApplication(fp.read())
                     fp.close()
 
                 msg.add_header('Content-Disposition', 'attachment', filename=transfer_name)
