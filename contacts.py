@@ -64,9 +64,6 @@ class Contacts:
 		email = email.lower()
 		return self.email_to_name.get(email)
 
-	all = string.maketrans('', '')
-	no_digits = all.translate(all, string.digits)
-
 	@staticmethod
 	def strip_and_reverse_phone_number(phone_number):
 		number = ''.join(ch for ch in phone_number if ch.isdigit())

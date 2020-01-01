@@ -20,7 +20,11 @@ def load_settings():
 	try:
 		with open(config.SETTINGS_FILE, 'r') as f:
 			return json.load(f)
-	except Exception:
+	except Exception as e:
+		print(e)
+		print('can''t load settings, do you want to reset it?')
+		# comment out the line bellow to reset the settings
+		raise e
 		return {'last_rowid' : 0, 'threads': {} }
 
 if __name__ == '__main__':
@@ -63,7 +67,7 @@ if __name__ == '__main__':
 
 	for message in MessagesDB.get_messages(settings['last_rowid']):
 
-		print message
+		print(message)
 
 		msg_id = '<%s_%s>' % (message['guid'], google_credentials.email)
 		date = datetime.datetime.fromtimestamp(978307200 + message['date']/1000000000)
@@ -80,7 +84,7 @@ if __name__ == '__main__':
 			handle_id = chat_handles[i]
 			thread_key += '_%s' % handle_id
 			name, name_and_address = handle_to_name[handle_id]
-			print u'%s %s %s'.format (handle_id, name.encode('utf-8'), name_and_address.encode('utf-8'))
+			print('%s %s %s'.format (handle_id, name.encode('utf-8'), name_and_address.encode('utf-8')))
 			if i == no_of_handles-1: # last element
 				names += name
 				names_and_addressess += name_and_address
@@ -94,7 +98,7 @@ if __name__ == '__main__':
 				names_and_addressess += name_and_address+'; '
 				original_bearer += handle_to_id[handle_id]+', '
 
-		print thread_key
+		print(thread_key)
 
 		if message['is_from_me']:
 			sender = me
@@ -113,13 +117,14 @@ if __name__ == '__main__':
 
 		thread = settings['threads'].get(thread_key, {"thread_id":None, "in_reply_to":None})
 
-		print sender.encode('utf-8')
-		print to.encode('utf-8')
-		print subject.encode('utf-8')
+		print(sender.encode('utf-8'))
+		print(to.encode('utf-8'))
+		print(date)
+		print(subject.encode('utf-8'))
 		if message['text']:
-			print message['text'].encode('utf-8')
+			print(message['text'].encode('utf-8'))
 		if message['attachments']:
-			print message['attachments']
+			print(message['attachments'])
 
 		msgs = Gmail.create_messages_with_attachments(msg_id, sender, to, subject, date, message['text'], message['attachments'],
 								   in_reply_to=thread['in_reply_to'], references=thread['in_reply_to'],

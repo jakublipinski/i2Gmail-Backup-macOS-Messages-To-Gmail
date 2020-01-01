@@ -1,2 +1,5 @@
 .vscode
 venv
+client_secrets.json
+credentials.storage
+settings.json

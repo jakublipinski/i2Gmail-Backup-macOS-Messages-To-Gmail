@@ -4,6 +4,7 @@ import config
 import oauth2client
 from oauth2client import client
 from oauth2client import tools
+from oauth2client import file
 
 try:
     import argparse
@@ -29,7 +30,6 @@ class GoogleCredentials:
         Returns:
             Credentials, the obtained credential.
         """
-
         store = oauth2client.file.Storage(config.CREDENTIALS_STORAGE_FILE)
         self.credentials = store.get()
         if not self.credentials or self.credentials.invalid:
@@ -37,9 +37,9 @@ class GoogleCredentials:
                                                   self.OAUTH_SCOPE)
             flow.user_agent = config.APPLICATION_NAME
             if flags:
-				self.credentials = tools.run_flow(flow, store, flags)
+                self.credentials = tools.run_flow(flow, store, flags)
             else: # Needed only for compatibility with Python 2.6
-				self.credentials = tools.run(flow, store)
+                self.credentials = tools.run(flow, store)
             print('Storing credentials to ' + config.CREDENTIALS_STORAGE_FILE)
 
         self.email = self.credentials.id_token['email']

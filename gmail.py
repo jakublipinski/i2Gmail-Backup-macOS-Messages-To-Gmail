@@ -26,7 +26,7 @@ class Gmail:
 
     def insert_message(self, message, user_id='me', threadId=None, labelIds=None):
         try:
-            print 'Message size: %d' % len(message['raw'])
+            print('Message size: %d' % len(message['raw']))
 
             if len(message['raw']) < 2000000:
                 if threadId:
@@ -54,7 +54,7 @@ class Gmail:
 
             print('Message Id: %s' % message['id'])
             return message
-        except errors.HttpError, error:
+        except errors.HttpError as error:
             print('An error occurred: %s' % error)
             raise
 
@@ -99,14 +99,14 @@ class Gmail:
             message['In-Reply-To'] = in_reply_to
         if references:
             message['References'] = references
-        message['From'] = sender.encode('utf-8')
-        message['To'] = to.encode('utf-8')
-        message['Subject'] = subject.encode('utf-8')
+        message['From'] = sender
+        message['To'] = to
+        message['Subject'] = subject
 
         message['Date'] = formatdate(time.mktime(date.timetuple()))
 
         if extra_headers:
-            for key, value in extra_headers.iteritems():
+            for key, value in extra_headers.items():
                 message[key] = value
 
         if attachments:
@@ -147,7 +147,9 @@ class Gmail:
                 msg.add_header('Content-Disposition', 'attachment', filename=transfer_name)
                 message.attach(msg)
 
-        return {'raw': base64.urlsafe_b64encode(message.as_string())}
+        m =  message.as_string()
+        b64 = base64.urlsafe_b64encode(m.encode("utf-8"))
+        return {'raw': b64.decode("utf-8")}
 
     def create_label(self, user_id, label_object):
         """Creates a new label within user's mailbox, also prints Label ID.
@@ -163,10 +165,10 @@ class Gmail:
         try:
             label = self.gmail_client.users().labels().create(userId=user_id,
                                                 body=label_object).execute()
-            print label['id']
+            print(label['id'])
             return label
-        except errors.HttpError, error:
-            print 'An error occurred: %s' % error
+        except(errors.HttpError, error):
+            print('An error occurred: %s' % error)
 
     @staticmethod
     def make_label(label_name, mlv='show', llv='labelShow'):
@@ -201,5 +203,5 @@ class Gmail:
             for label in labels:
                 ret[label['name']] = label['id']
             return ret
-        except errors.HttpError, error:
-            print 'An error occurred: %s' % error
+        except errors.HttpError as error:
+            print('An error occurred: %s' % error)
