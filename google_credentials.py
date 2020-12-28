@@ -34,7 +34,4 @@ class GoogleCredentials:
             with open(config.TOKEN_FILE, 'wb') as token:
                 pickle.dump(creds, token)
 
-
         self.credentials = creds
-
-        self.email = config.EMAIL

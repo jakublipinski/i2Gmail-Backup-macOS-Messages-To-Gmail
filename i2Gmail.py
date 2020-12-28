@@ -53,10 +53,7 @@ if __name__ == '__main__':
 		else:
 			handle_to_name[handle['rowid']] = (id, id)
 
-	if contacts.get_by_email(google_credentials.email):
-		me = contacts.get_by_email(google_credentials.email)[1]
-	else:
-		me = google_credentials.email
+	me = config.ME
 
 	labels = gmail.get_labels("me")
 	if config.GMAIL_LABEL not in labels.keys():
@@ -68,7 +65,7 @@ if __name__ == '__main__':
 
 		print(message)
 
-		msg_id = '<%s_%s>' % (message['guid'], google_credentials.email)
+		msg_id = '<%s_%s>' % (message['guid'], config.EMAIL)
 		date = datetime.datetime.fromtimestamp(978307200 + message['date']/1000000000)
 
 		names = ''
