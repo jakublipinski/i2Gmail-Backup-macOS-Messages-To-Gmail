@@ -7,8 +7,8 @@ from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import formatdate
-import googleapiclient
 import mimetypes
+import googleapiclient
 
 import httplib2
 from apiclient import discovery, errors
@@ -19,10 +19,9 @@ class Gmail:
 
     def __init__(self, credentials):
         # Authorize the httplib2.Http object with our credentials
-        http = credentials.authorize(httplib2.Http())
 
         # Build the Gmail service from discovery
-        self.gmail_client = discovery.build('gmail', 'v1', http=http)
+        self.gmail_client =  googleapiclient.discovery.build('gmail', 'v1', credentials=credentials)
 
     def insert_message(self, message, user_id='me', threadId=None, labelIds=None):
         try:
@@ -127,7 +126,7 @@ class Gmail:
 
                 main_type, sub_type = content_type.split('/', 1)
                 if main_type == 'text':
-                    fp = open(filename, 'rb')
+                    fp = open(filename, 'r')
                     msg = MIMEText(fp.read(), _subtype=sub_type)
                     fp.close()
                 elif main_type == 'image':

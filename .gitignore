@@ -3,3 +3,6 @@ venv
 client_secrets.json
 credentials.storage
 settings.json
+token.pickle
+__pycache__
+client_secret_276850382203-vaaq0750dkc3kvk93tf0mavr5fqp4o5k.apps.googleusercontent.com.json

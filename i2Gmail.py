@@ -2,8 +2,8 @@
 import datetime, re
 
 from google_credentials import GoogleCredentials
-from gmail import Gmail
 from contacts import Contacts
+from gmail import Gmail
 from MessagesDB import MessagesDB
 import json
 import config
@@ -30,12 +30,11 @@ def load_settings():
 if __name__ == '__main__':
 	google_credentials = GoogleCredentials()
 	google_credentials.authenticate()
-
+	
 	gmail = Gmail(google_credentials.credentials)
 
 	contacts = Contacts(google_credentials.credentials)
 	contacts.load_contacts()
-
 	MessagesDB = MessagesDB()
 
 	# handle_id to Name cache

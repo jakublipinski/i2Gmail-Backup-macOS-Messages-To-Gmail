@@ -1,45 +1,40 @@
-from __future__ import print_function
 import config
 
-import oauth2client
-from oauth2client import client
-from oauth2client import tools
-from oauth2client import file
-
-try:
-    import argparse
-    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
-except ImportError:
-    flags = None
-
+import pickle
+import os.path
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
 
 class GoogleCredentials:
 
     # Check https://developers.google.com/gmail/api/auth/scopes for all available scopes
-    OAUTH_SCOPE = ['https://www.googleapis.com/auth/userinfo.email',
+    OAUTH_SCOPES = ['https://www.googleapis.com/auth/userinfo.email',
                    'https://www.googleapis.com/auth/gmail.insert',
                    'https://www.googleapis.com/auth/gmail.labels',
-                   'https://www.googleapis.com/auth/contacts.readonly']
+                   'https://www.googleapis.com/auth/contacts.readonly',
+                   'openid']
 
     def authenticate(self):
-        """Gets valid user credentials from storage.
+        creds = None
+        # The file token.pickle stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        if os.path.exists(config.TOKEN_FILE):
+            with open(config.TOKEN_FILE, 'rb') as token:
+                creds = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(config.CLIENT_SECRET_FILE, GoogleCredentials.OAUTH_SCOPES)
+                creds = flow.run_local_server(port=0)
+            # Save the credentials for the next run
+            with open(config.TOKEN_FILE, 'wb') as token:
+                pickle.dump(creds, token)
 
-        If nothing has been stored, or if the stored credentials are invalid,
-        the OAuth2 flow is completed to obtain the new credentials.
 
-        Returns:
-            Credentials, the obtained credential.
-        """
-        store = oauth2client.file.Storage(config.CREDENTIALS_STORAGE_FILE)
-        self.credentials = store.get()
-        if not self.credentials or self.credentials.invalid:
-            flow = client.flow_from_clientsecrets(config.CLIENT_SECRET_FILE,
-                                                  self.OAUTH_SCOPE)
-            flow.user_agent = config.APPLICATION_NAME
-            if flags:
-                self.credentials = tools.run_flow(flow, store, flags)
-            else: # Needed only for compatibility with Python 2.6
-                self.credentials = tools.run(flow, store)
-            print('Storing credentials to ' + config.CREDENTIALS_STORAGE_FILE)
+        self.credentials = creds
 
-        self.email = self.credentials.id_token['email']
+        self.email = config.EMAIL
